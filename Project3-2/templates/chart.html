@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salmon Population Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Salmon Population Chart</h1>
+  <label for="yearSelect">Select Year:</label>
+  <select id="yearSelect"></select>
+  <canvas id="myChart"></canvas>
+
+  <script>
+    // Get the year select element
+    let yearSelect = document.getElementById('yearSelect');
+
+    // Generate options for years from 1950 to 2020
+    for (let year = 1950; year <= 2020; year++) {
+      let option = document.createElement('option');
+      option.value = year;
+      option.text = year;
+      yearSelect.appendChild(option);
+    }
+
+    let ctx = document.getElementById('myChart').getContext('2d');
+
+    // Fetch chart data based on the selected year
+    yearSelect.addEventListener('change', function() {
+      let year = yearSelect.value;  // Get the selected year
+
+      fetch('/chart-data/' + year)
+        .then(response => response.json())
+        .then(data => {
+          let labels = Object.keys(data);
+          let hatcheryData = labels.map(label => data[label].hatchery);
+          let wildData = labels.map(label => data[label].wild);
+
+          new Chart(ctx, {
+              type: 'bar',
+              data: {
+                  labels: labels,
+                  datasets: [
+                      {
+                          label: 'Hatchery Salmon',
+                          data: hatcheryData,
+                          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                          borderColor: 'rgba(255, 99, 132, 1)',
+                          borderWidth: 1
+                      },
+                      {
+                          label: 'Wild Salmon',
+                          data: wildData,
+                          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                          borderColor: 'rgba(54, 162, 235, 1)',
+                          borderWidth: 1
+                      }
+                  ]
+              },
+              options: {
+                  scales: {
+                      y: {
+                          beginAtZero: true
+                      }
+                  }
+              }
+          });
+        });
+    });
+  </script>
+</body>
+</html>
